@@ -1,20 +1,22 @@
-# Windows Kurulum
+# Windows Kurulum ve Calistirma
 
 ## Gerekli programlar
 
-- Git for Windows
-- .NET SDK
-- Node.js LTS
-- Visual Studio Code veya Visual Studio 2022
-- Sonraki sprint icin SQL Server Developer/Express + SQL Server Management Studio
+1. Git for Windows
+2. .NET SDK
+3. Node.js LTS
+4. Visual Studio Code veya Visual Studio 2022
+5. SQL Server Developer/Express ve SQL Server Management Studio; sonraki sprintte gercek veritabani icin gerekli olacak.
 
-## Onerilen klasor
+## Klasor onerisi
+
+Projeyi su klasore koy:
 
 ```powershell
 C:\Users\mentis\Documents\Codex\EtOps360
 ```
 
-## Calistirma
+## Ilk calistirma
 
 Backend:
 
@@ -38,10 +40,19 @@ Tarayici:
 http://localhost:5173
 ```
 
-GitHub'a guncelleme:
+## Frontend kontrol
 
 ```powershell
+cd C:\Users\mentis\Documents\Codex\EtOps360\src\web
+npm run build
+npm run lint
+```
+
+## GitHub'a guncelleme
+
+```powershell
+cd C:\Users\mentis\Documents\Codex\EtOps360
 git add .
-git commit -m "EtOps360 sprint 01 baslangic"
+git commit -m "EtOps360 sprint 01 guncellemesi"
 git push
 ```

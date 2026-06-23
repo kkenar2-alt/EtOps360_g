@@ -1,24 +1,28 @@
 # EtOps 360
 
-EtOps 360; kirmizi et, beyaz et, islenmis et, balik/deniz urunleri ve yan urun operasyonlarini **karkastan kasaya** izleyen web tabanli operasyon, evrak, mutabakat ve raporlama platformu iskeletidir.
+EtOps 360; kirmizi et, beyaz et, islenmis et, deniz urunleri ve yan urun operasyonlarini **karkastan kasaya** izleyen web tabanli operasyon, evrak, mutabakat ve raporlama platformu iskeletidir.
 
-Logo Tiger 3 resmi ERP omurgasi olarak kalir. EtOps 360 operasyon verisini toplar, dogrular, onaylatir ve Logo'ya kontrollu aktarim kuyrugu uretir.
+Logo Tiger 3 resmi ERP omurgasi olarak kalir. EtOps 360 operasyon verisini toplar, dogrular, onaylatir ve Logo'ya kontrollu aktarim kuyrugu uretir. Logo veritabanina kontrolsuz insert/update yapilmaz.
 
-## Sprint 01 ile gelenler
+## Kapsam
 
 - Kullanici, rol ve sube yetkili giris akisi
-- Karkastan kasaya Control Tower ekranı
-- Katalog/kart tanimlari: sube, urun ailesi, surec, evrak tipi, fire/iade/fark nedeni
-- Traceability: karkas kabul -> parcalama -> uretim -> sevkiyat -> sube kabul -> POS/fire/iade -> banka -> Logo
-- Is kuyrugu, kalite kontrol, rapor tanimi ve entegrasyon kuyrugu API'leri
-- Entegrasyonsuz firmalarda combodan secimli manuel evrak yaklasimi
-- Mevcut operasyon tablosunda siralama, gruplama, sutun genisligi degistirme
+- Karkas kabul, parcalama, uretim ve randiman zinciri
+- Sube siparis onerisi, onay, fire ve iade hareketleri
+- WMS/FEFO, soguk zincir ve sube kabul farklari
+- Entegrasyonsuz firmalar icin combodan secimli manuel evrak uretimi
+- Evrak detay, satir, lot, tutar ve audit trail gorunumu
+- POS, yemek karti, online odeme ve banka mutabakati
+- Logo Tiger 3 aktarim kuyrugu ve idempotency temeli
+- HACCP/CCP/OPRP kalite kontrol ve blokaj iskeleti
+- Esnek raporlama: filtre, gruplama, sutun filtreleri, CSV aktarimi
+- Kart tabanli tanimlar: sube, bolge, urun ailesi, surec, evrak tipi, fire nedeni, partner, birim
 
 ## Teknoloji
 
-- Backend: ASP.NET Core Minimal API
+- Backend: ASP.NET Core Minimal API, .NET SDK
 - Frontend: React + TypeScript + Vite
-- UI: Recharts, Lucide React
+- Grafik/UI: Recharts, Lucide React
 - Baslangic veri katmani: Seeded read model
 - Sonraki veri katmani: SQL Server veya PostgreSQL + EF Core migration
 
@@ -27,7 +31,13 @@ Logo Tiger 3 resmi ERP omurgasi olarak kalir. EtOps 360 operasyon verisini topla
 ```text
 EtOps360/
   docs/
+    architecture.md
+    module-roadmap.md
+    SPRINT-01-BASLANGIC.md
+    DEVELOPMENT-STANDARDS.md
+    INSTALL-WINDOWS.md
   scripts/
+    bootstrap-windows.ps1
   src/
     EtOps360.Api/
     EtOps360.Application/
@@ -37,7 +47,7 @@ EtOps360/
     web/
 ```
 
-## Calistirma
+## Windows'ta calistirma
 
 Backend:
 
@@ -63,17 +73,35 @@ http://localhost:5173
 
 ## Demo kullanicilar
 
-- `merkez.planlama`
-- `bolge.marmara`
-- `sube.bursa12`
-- `finans.pos`
-- `kalite.merkez`
+- `merkez.planlama` - tum subeler, operasyon, rapor, kart ve entegrasyon kuyrugu
+- `bolge.marmara` - Bursa 12 bolge yetkisi
+- `sube.bursa12` - sadece Bursa 12 sube yetkisi
+- `finans.pos` - POS/banka mutabakati ve entegrasyon kuyrugu
+- `kalite.merkez` - kalite, blokaj ve rapor yetkisi
+
+## Gelistirme kontrolu
+
+Frontend build:
+
+```powershell
+cd src\web
+npm run build
+```
+
+GitHub'a guncelleme:
+
+```powershell
+git add .
+git commit -m "EtOps360 sprint 01 guncellemesi"
+git push
+```
 
 ## Uretime gecmeden once zorunlu isler
 
-- JWT/refresh token veya SSO + MFA
+- Gercek kimlik dogrulama: JWT/refresh token veya SSO + MFA
 - RBAC + ABAC + object-level authorization
 - SQL veri modeli, audit log ve outbox/idempotency tablolari
 - Logo Tiger 3 resmi adapter/RPA/API stratejisi
 - POS, banka, yemek karti ve online platform staging tablolari
-- Secrets vault, SAST/DAST/dependency scanning, rate limit ve WAF
+- SAST, DAST, dependency scanning, rate limit, WAF
+- Secrets vault, ortam bazli konfigurasyon ve log maskeleme

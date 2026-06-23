@@ -24,6 +24,14 @@ const statusIcon = (status: string) => {
 export function DashboardOverview({ summary }: DashboardOverviewProps) {
   return (
     <section className="dashboard-grid">
+      <div className="sprint-banner">
+        <div>
+          <p className="eyebrow">Sprint 02 görünür sürüm</p>
+          <h2>Karkastan kasaya kontrol kulesi genişledi</h2>
+          <span>Yetki matrisi, ürün/stok kartları, manuel evrak akışı, rapor/CSV ve Logo outbox omurgası aynı ekranda.</span>
+        </div>
+        <strong>02</strong>
+      </div>
       <div className="kpi-grid">
         {summary.kpis.map((kpi) => (
           <article key={kpi.id} className={`kpi-card kpi-card--${kpi.tone}`}>

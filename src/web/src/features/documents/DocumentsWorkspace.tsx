@@ -15,17 +15,23 @@ type DocumentsWorkspaceProps = {
   documents: DocumentRow[]
   documentTypes: SelectOption[]
   branches: SelectOption[]
+  reasonCodes: SelectOption[]
+  partners: SelectOption[]
+  units: SelectOption[]
+  products: SelectOption[]
   filters: EtOpsFilters
 }
 
-const reasonOptions: SelectOption[] = [
-  { id: 'manual-entry', label: 'Entegrasyon yok - manuel evrak' },
-  { id: 'waste-approval', label: 'Fire onayi' },
-  { id: 'settlement-close', label: 'Mutabakat kapama' },
-  { id: 'quality-hold', label: 'Kalite blokaji' },
-]
-
-export function DocumentsWorkspace({ documents, documentTypes, branches, filters }: DocumentsWorkspaceProps) {
+export function DocumentsWorkspace({
+  documents,
+  documentTypes,
+  branches,
+  reasonCodes,
+  partners,
+  units,
+  products,
+  filters,
+}: DocumentsWorkspaceProps) {
   const [selectedDocumentId, setSelectedDocumentId] = useState(documents[0]?.id ?? '')
   const [detail, setDetail] = useState<DocumentDetail | null>(null)
   const [generated, setGenerated] = useState<GeneratedDocument | null>(null)
@@ -34,6 +40,11 @@ export function DocumentsWorkspace({ documents, documentTypes, branches, filters
     sourceId: 'manual',
     branchId: filters.branchId === 'all' ? 'bursa-12' : filters.branchId,
     reasonCode: 'manual-entry',
+    partnerId: partners[0]?.id ?? 'logo',
+    productId: products[0]?.id ?? 'kofte-180',
+    quantity: 1,
+    unit: units[0]?.id ?? 'kg',
+    note: 'Entegrasyonsuz firma icin kontrollu manuel taslak',
   })
 
   const visibleBranches = useMemo(() => branches.filter((branch) => branch.id !== 'all'), [branches])
@@ -58,7 +69,7 @@ export function DocumentsWorkspace({ documents, documentTypes, branches, filters
         <div className="panel-heading">
           <div>
             <p className="eyebrow">Evrak merkezi</p>
-            <h2>Olusan ve manuel girilen evraklar</h2>
+            <h2>Oluşan ve manuel girilen evraklar</h2>
           </div>
           <FolderOpen size={20} />
         </div>
@@ -73,6 +84,7 @@ export function DocumentsWorkspace({ documents, documentTypes, branches, filters
               <div>
                 <strong>{document.documentNo}</strong>
                 <span>{document.type}</span>
+                <small>{document.branch} · {document.partner}</small>
               </div>
               <StatusPill value={document.status} />
             </button>
@@ -84,7 +96,7 @@ export function DocumentsWorkspace({ documents, documentTypes, branches, filters
         <div className="panel-heading">
           <div>
             <p className="eyebrow">Tıklama ile detay</p>
-            <h2>{detail?.title ?? 'Evrak secin'}</h2>
+            <h2>{detail?.title ?? 'Evrak seçin'}</h2>
           </div>
           {detail ? <StatusPill value={detail.status} /> : null}
         </div>
@@ -95,7 +107,18 @@ export function DocumentsWorkspace({ documents, documentTypes, branches, filters
               {detail.fields.map((field) => (
                 <label key={field.label} className="detail-field">
                   <span>{field.label}</span>
-                  <input value={field.value} readOnly={field.kind === 'readonly' || field.kind === 'status'} />
+                  {field.options && field.options.length > 0 ? (
+                    <select defaultValue={field.options.find((option) => option.label === field.value)?.id ?? ''}>
+                      <option value="">{field.value}</option>
+                      {field.options.map((option) => (
+                        <option key={option.id} value={option.id}>
+                          {option.label}
+                        </option>
+                      ))}
+                    </select>
+                  ) : (
+                    <input value={field.value} readOnly />
+                  )}
                 </label>
               ))}
             </div>
@@ -120,15 +143,15 @@ export function DocumentsWorkspace({ documents, documentTypes, branches, filters
             </div>
           </>
         ) : (
-          <div className="empty-state">Evrak detayına ulasilamadi.</div>
+          <div className="empty-state">Evrak detayına ulaşılamadı.</div>
         )}
       </div>
 
       <div className="manual-document-panel">
         <div className="panel-heading">
           <div>
-            <p className="eyebrow">Entegrasyonsuz firma akisi</p>
-            <h2>Tıklama ile evrak oluştur</h2>
+            <p className="eyebrow">Entegrasyonsuz firma akışı</p>
+            <h2>Başından sonuna evrak oluştur</h2>
           </div>
           <FilePlus2 size={20} />
         </div>
@@ -142,22 +165,61 @@ export function DocumentsWorkspace({ documents, documentTypes, branches, filters
         />
         <ComboField
           id="document-branch"
-          label="Sube / nokta"
+          label="Şube / nokta"
           value={draft.branchId}
           options={visibleBranches}
           onChange={(value) => setDraft((current) => ({ ...current, branchId: value }))}
         />
         <ComboField
+          id="document-product"
+          label="Ürün / malzeme"
+          value={draft.productId}
+          options={products}
+          onChange={(value) => setDraft((current) => ({ ...current, productId: value }))}
+        />
+        <ComboField
           id="document-reason"
           label="Neden"
           value={draft.reasonCode}
-          options={reasonOptions}
+          options={reasonCodes}
           onChange={(value) => setDraft((current) => ({ ...current, reasonCode: value }))}
         />
+        <ComboField
+          id="document-partner"
+          label="Partner / cari"
+          value={draft.partnerId}
+          options={partners}
+          onChange={(value) => setDraft((current) => ({ ...current, partnerId: value }))}
+        />
+        <ComboField
+          id="document-unit"
+          label="Birim"
+          value={draft.unit}
+          options={units}
+          onChange={(value) => setDraft((current) => ({ ...current, unit: value }))}
+        />
+        <label className="detail-field" htmlFor="document-quantity">
+          <span>Miktar</span>
+          <input
+            id="document-quantity"
+            type="number"
+            min="0"
+            value={draft.quantity}
+            onChange={(event) => setDraft((current) => ({ ...current, quantity: Number(event.target.value) }))}
+          />
+        </label>
+        <label className="detail-field detail-field--wide" htmlFor="document-note">
+          <span>Açıklama</span>
+          <textarea
+            id="document-note"
+            value={draft.note}
+            onChange={(event) => setDraft((current) => ({ ...current, note: event.target.value }))}
+          />
+        </label>
 
         <button type="button" className="primary-action" onClick={createDocument}>
           <WandSparkles size={18} />
-          Evrak taslagi olustur
+          Evrak taslağı oluştur ve detaya bağla
         </button>
 
         {generated ? (

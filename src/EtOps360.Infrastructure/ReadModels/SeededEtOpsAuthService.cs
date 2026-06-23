@@ -23,31 +23,36 @@ internal sealed class SeededEtOpsAuthService(IEtOpsReadModel readModel) : IEtOps
             "Merkez Planlama",
             "Merkez Planlama",
             ["all", "merkez", "bursa-12", "ankara-04", "izmir-08", "antalya-03"],
-            "all"),
+            "all",
+            ["dashboard:view", "operations:approve", "documents:generate", "reports:view", "catalogs:manage", "integrations:queue", "security:manage", "quality:hold", "reconciliation:close"]),
         new(
             "bolge.marmara",
             "Marmara Bolge Muduru",
             "Bolge Muduru",
             ["bursa-12"],
-            "bursa-12"),
+            "bursa-12",
+            ["dashboard:view", "operations:approve", "documents:generate", "reports:view"]),
         new(
             "sube.bursa12",
             "Bursa 12 Sube Muduru",
             "Sube Muduru",
             ["bursa-12"],
-            "bursa-12"),
+            "bursa-12",
+            ["dashboard:view", "documents:generate"]),
         new(
             "finans.pos",
             "POS Mutabakat Uzmani",
             "Finans",
             ["all", "bursa-12", "ankara-04", "izmir-08", "antalya-03"],
-            "all"),
+            "all",
+            ["dashboard:view", "reconciliation:close", "documents:generate", "integrations:queue"]),
         new(
             "kalite.merkez",
             "Merkez Kalite",
             "Kalite",
             ["merkez", "izmir-08", "antalya-03"],
-            "merkez")
+            "merkez",
+            ["dashboard:view", "quality:hold", "documents:generate", "reports:view"])
     ];
 
     public Task<LoginOptionsDto> GetLoginOptionsAsync(CancellationToken cancellationToken)
@@ -78,7 +83,8 @@ internal sealed class SeededEtOpsAuthService(IEtOpsReadModel readModel) : IEtOps
             profile.UserName,
             profile.Role,
             branchId,
-            profile.AllowedBranchIds);
+            profile.AllowedBranchIds,
+            profile.Permissions ?? []);
 
         var bootstrap = await readModel.GetBootstrapAsync(session, cancellationToken);
         var tokenBytes = Encoding.UTF8.GetBytes($"{profile.UserName}:{branchId}:{Guid.NewGuid():N}");

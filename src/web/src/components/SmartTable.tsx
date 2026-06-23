@@ -1,4 +1,4 @@
-import { ChevronDown, ChevronsUpDown } from 'lucide-react'
+import { ChevronDown, ChevronsUpDown, Download, FilterX } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { useMemo, useState } from 'react'
 import { StatusPill } from './StatusPill'
@@ -9,6 +9,7 @@ export type SmartTableColumn<T extends object> = {
   minWidth?: number
   preferredWidth?: number
   groupable?: boolean
+  filterable?: boolean
   render?: (row: T) => ReactNode
 }
 
@@ -19,6 +20,16 @@ type SmartTableProps<T extends object> = {
   groupBy?: string
   onGroupByChange?: (value: string) => void
   onOpenRow?: (row: T) => void
+  dense?: boolean
+}
+
+const stringValue = <T extends object>(row: T, key: string) => String(row[key as keyof T] ?? '')
+
+const isNumericLike = (value: string) => value !== '' && !Number.isNaN(Number(value.replace(',', '.')))
+
+const toCsv = (headers: string[], rows: string[][]) => {
+  const escape = (value: string) => `"${value.replaceAll('"', '""')}"`
+  return [headers.map(escape).join(';'), ...rows.map((row) => row.map(escape).join(';'))].join('\n')
 }
 
 export function SmartTable<T extends object>({
@@ -28,22 +39,38 @@ export function SmartTable<T extends object>({
   groupBy = '',
   onGroupByChange,
   onOpenRow,
+  dense = false,
 }: SmartTableProps<T>) {
   const [sortKey, setSortKey] = useState<string>(columns[0]?.key ?? '')
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc')
+  const [columnFilters, setColumnFilters] = useState<Record<string, string>>({})
   const [widths, setWidths] = useState<Record<string, number>>(() =>
     Object.fromEntries(columns.map((column) => [column.key, column.preferredWidth ?? 150])),
   )
 
+  const filteredRows = useMemo(() => {
+    const activeFilters = Object.entries(columnFilters).filter(([, value]) => value.trim())
+    if (activeFilters.length === 0) return rows
+
+    return rows.filter((row) =>
+      activeFilters.every(([key, value]) =>
+        stringValue(row, key).toLocaleLowerCase('tr-TR').includes(value.toLocaleLowerCase('tr-TR')),
+      ),
+    )
+  }, [columnFilters, rows])
+
   const sortedRows = useMemo(() => {
-    const nextRows = [...rows]
+    const nextRows = [...filteredRows]
     nextRows.sort((a, b) => {
-      const first = String(a[sortKey as keyof T] ?? '')
-      const second = String(b[sortKey as keyof T] ?? '')
-      return sortDirection === 'asc' ? first.localeCompare(second) : second.localeCompare(first)
+      const first = stringValue(a, sortKey)
+      const second = stringValue(b, sortKey)
+      const result = isNumericLike(first) && isNumericLike(second)
+        ? Number(first.replace(',', '.')) - Number(second.replace(',', '.'))
+        : first.localeCompare(second, 'tr-TR')
+      return sortDirection === 'asc' ? result : -result
     })
     return nextRows
-  }, [rows, sortDirection, sortKey])
+  }, [filteredRows, sortDirection, sortKey])
 
   const groupedRows = useMemo(() => {
     if (!groupBy) return new Map<string, T[]>([['Tum kayitlar', sortedRows]])
@@ -86,28 +113,53 @@ export function SmartTable<T extends object>({
     setSortDirection('asc')
   }
 
+  const exportCsv = () => {
+    const headers = columns.map((column) => column.label)
+    const body = sortedRows.map((row) => columns.map((column) => stringValue(row, column.key)))
+    const blob = new Blob([`\ufeff${toCsv(headers, body)}`], { type: 'text/csv;charset=utf-8' })
+    const url = URL.createObjectURL(blob)
+    const anchor = document.createElement('a')
+    anchor.href = url
+    anchor.download = `${title.replaceAll(' ', '_')}.csv`
+    anchor.click()
+    URL.revokeObjectURL(url)
+  }
+
+  const clearFilters = () => setColumnFilters({})
+
   return (
-    <section className="table-panel">
-      <div className="panel-heading">
+    <section className={dense ? 'table-panel table-panel--dense' : 'table-panel'}>
+      <div className="panel-heading panel-heading--table">
         <div>
-          <p className="eyebrow">Filtrelenebilir operasyon tablosu</p>
+          <p className="eyebrow">Filtrelenebilir, gruplanabilir tablo</p>
           <h2>{title}</h2>
+          <small>{sortedRows.length.toLocaleString('tr-TR')} / {rows.length.toLocaleString('tr-TR')} kayit</small>
         </div>
-        {onGroupByChange ? (
-          <label className="mini-combo">
-            Grupla
-            <select value={groupBy} onChange={(event) => onGroupByChange(event.target.value)}>
-              <option value="">Yok</option>
-              {columns
-                .filter((column) => column.groupable)
-                .map((column) => (
-                  <option key={column.key} value={column.key}>
-                    {column.label}
-                  </option>
-                ))}
-            </select>
-          </label>
-        ) : null}
+        <div className="table-actions">
+          {onGroupByChange ? (
+            <label className="mini-combo">
+              Grupla
+              <select value={groupBy} onChange={(event) => onGroupByChange(event.target.value)}>
+                <option value="">Yok</option>
+                {columns
+                  .filter((column) => column.groupable)
+                  .map((column) => (
+                    <option key={column.key} value={column.key}>
+                      {column.label}
+                    </option>
+                  ))}
+              </select>
+            </label>
+          ) : null}
+          <button type="button" className="ghost-action" onClick={clearFilters}>
+            <FilterX size={16} />
+            Filtreleri temizle
+          </button>
+          <button type="button" className="ghost-action" onClick={exportCsv}>
+            <Download size={16} />
+            CSV
+          </button>
+        </div>
       </div>
 
       <div className="smart-table" role="table">
@@ -133,6 +185,19 @@ export function SmartTable<T extends object>({
           ))}
         </div>
 
+        <div className="smart-row smart-row--filters" style={{ gridTemplateColumns: templateColumns }}>
+          {columns.map((column) => (
+            <label key={column.key} className="smart-cell smart-cell--filter">
+              <input
+                aria-label={`${column.label} filtre`}
+                value={columnFilters[column.key] ?? ''}
+                onChange={(event) => setColumnFilters((current) => ({ ...current, [column.key]: event.target.value }))}
+                placeholder="Filtre"
+              />
+            </label>
+          ))}
+        </div>
+
         {[...groupedRows.entries()].map(([group, groupRows]) => (
           <div key={group} className="table-group">
             <div className="group-label">
@@ -153,7 +218,7 @@ export function SmartTable<T extends object>({
                   const isStatus = column.key.toLowerCase().includes('status') || column.key.toLowerCase().includes('state')
 
                   return (
-                    <span key={column.key} className="smart-cell">
+                    <span key={column.key} className="smart-cell" title={String(rawValue ?? '')}>
                       {isStatus && typeof value === 'string' ? <StatusPill value={value} /> : value}
                     </span>
                   )

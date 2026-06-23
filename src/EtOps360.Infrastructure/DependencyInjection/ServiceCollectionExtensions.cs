@@ -10,7 +10,6 @@ public static class ServiceCollectionExtensions
     {
         services.AddSingleton<IEtOpsReadModel, SeededEtOpsReadModel>();
         services.AddSingleton<IEtOpsAuthService, SeededEtOpsAuthService>();
-        services.AddSingleton<IControlTowerReadModel, SeededControlTowerReadModel>();
         return services;
     }
 }

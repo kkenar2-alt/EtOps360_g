@@ -1,25 +1,26 @@
 import type {
   Bootstrap,
+  CatalogSection,
   DashboardSummary,
   DocumentDetail,
   DocumentRow,
   EtOpsFilters,
   GenerateDocumentRequest,
   GeneratedDocument,
+  IntegrationQueueItem,
   LoginOptions,
   LoginRequest,
   LoginResponse,
+  OperationDetail,
   OperationRow,
-  ReconciliationRow,
-} from '../types/etops'
-import type {
-  ControlCatalogSection,
-  IntegrationQueueItem,
   QualityCheck,
+  ReconciliationRow,
   ReportDefinition,
-  TraceChain,
+  ReportResult,
+  SecurityModel,
+  TraceabilityResponse,
   WorkQueueItem,
-} from '../types/controltower'
+} from '../types/etops'
 
 const apiBase = import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:5096/api'
 
@@ -61,6 +62,11 @@ export const etOpsApi = {
   bootstrap: () => fetchJson<Bootstrap>('/bootstrap'),
   dashboard: (filters: Partial<EtOpsFilters>) => fetchJson<DashboardSummary>(`/dashboard${query(filters)}`),
   operations: (filters: Partial<EtOpsFilters>) => fetchJson<OperationRow[]>(`/operations${query(filters)}`),
+  operation: (id: string) => fetchJson<OperationDetail>(`/operations/${id}`),
+  traceability: (filters: Partial<EtOpsFilters>) =>
+    fetchJson<TraceabilityResponse>(`/traceability${query(filters)}`),
+  workQueue: (filters: Partial<EtOpsFilters>) => fetchJson<WorkQueueItem[]>(`/work-queue${query(filters)}`),
+  quality: (filters: Partial<EtOpsFilters>) => fetchJson<QualityCheck[]>(`/quality${query(filters)}`),
   reconciliation: (filters: Partial<EtOpsFilters>) =>
     fetchJson<ReconciliationRow[]>(`/reconciliation${query(filters)}`),
   documents: (filters: Partial<EtOpsFilters>) => fetchJson<DocumentRow[]>(`/documents${query(filters)}`),
@@ -70,13 +76,10 @@ export const etOpsApi = {
       method: 'POST',
       body: JSON.stringify(request),
     }),
-  controlCatalogs: () => fetchJson<ControlCatalogSection[]>('/control/catalogs'),
-  controlTraceability: (filters: Partial<EtOpsFilters>) =>
-    fetchJson<TraceChain>(`/control/traceability${query(filters)}`),
-  controlWorkQueue: (filters: Partial<EtOpsFilters>) =>
-    fetchJson<WorkQueueItem[]>(`/control/work-queue${query(filters)}`),
-  controlQuality: (filters: Partial<EtOpsFilters>) =>
-    fetchJson<QualityCheck[]>(`/control/quality${query(filters)}`),
-  controlReports: () => fetchJson<ReportDefinition[]>('/control/reports'),
-  controlIntegrationQueue: () => fetchJson<IntegrationQueueItem[]>('/control/integration-queue'),
+  catalogs: () => fetchJson<CatalogSection[]>('/catalogs'),
+  reports: () => fetchJson<ReportDefinition[]>('/reports'),
+  reportResult: (reportId: string, filters: Partial<EtOpsFilters>) =>
+    fetchJson<ReportResult>(`/reports/${reportId}/result${query(filters)}`),
+  integrationQueue: () => fetchJson<IntegrationQueueItem[]>('/integration-queue'),
+  securityModel: () => fetchJson<SecurityModel>('/security-model'),
 }

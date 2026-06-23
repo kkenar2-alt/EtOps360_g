@@ -15,14 +15,16 @@ public sealed record UserSessionDto(
     string UserName,
     string Role,
     string ActiveBranchId,
-    IReadOnlyList<string> AllowedBranchIds);
+    IReadOnlyList<string> AllowedBranchIds,
+    IReadOnlyList<string>? Permissions = null);
 
 public sealed record LoginProfileDto(
     string UserName,
     string DisplayName,
     string Role,
     IReadOnlyList<string> AllowedBranchIds,
-    string DefaultBranchId);
+    string DefaultBranchId,
+    IReadOnlyList<string>? Permissions = null);
 
 public sealed record LoginOptionsDto(
     IReadOnlyList<LoginProfileDto> Profiles,
@@ -43,6 +45,11 @@ public sealed record EtOpsBootstrapDto(
     IReadOnlyList<SelectOptionDto> Branches,
     IReadOnlyList<SelectOptionDto> ProteinFamilies,
     IReadOnlyList<SelectOptionDto> DocumentTypes,
+    IReadOnlyList<SelectOptionDto> ReasonCodes,
+    IReadOnlyList<SelectOptionDto> Units,
+    IReadOnlyList<SelectOptionDto> ProcessTypes,
+    IReadOnlyList<SelectOptionDto> Partners,
+    IReadOnlyList<SelectOptionDto> ProductMasters,
     IReadOnlyList<SmartColumnDto> OperationColumns);
 
 public sealed record SmartColumnDto(
@@ -80,7 +87,9 @@ public sealed record AlertDto(
     string Title,
     string Detail,
     string Owner,
-    string ActionLabel);
+    string ActionLabel,
+    string? TargetModule = null,
+    string? TargetId = null);
 
 public sealed record DashboardSummaryDto(
     IReadOnlyList<KpiCardDto> Kpis,
@@ -103,7 +112,18 @@ public sealed record OperationRowDto(
     string WasteReason,
     string Status,
     string DocumentNo,
-    string UpdatedAt);
+    string UpdatedAt,
+    string TemperatureStatus = "Normal",
+    string ApprovalStep = "Bolge onayi");
+
+public sealed record OperationDetailDto(
+    string Id,
+    string Title,
+    IReadOnlyList<DocumentFieldDto> Fields,
+    IReadOnlyList<DocumentLineDto> Lines,
+    IReadOnlyList<TraceabilityNodeDto> Traceability,
+    IReadOnlyList<string> Decisions,
+    IReadOnlyList<string> AuditTrail);
 
 public sealed record ReconciliationRowDto(
     string Id,
@@ -142,7 +162,8 @@ public sealed record DocumentDetailDto(
 public sealed record DocumentFieldDto(
     string Label,
     string Value,
-    string Kind);
+    string Kind,
+    IReadOnlyList<SelectOptionDto>? Options = null);
 
 public sealed record DocumentLineDto(
     string Product,
@@ -155,7 +176,12 @@ public sealed record GenerateDocumentRequest(
     string DocumentType,
     string SourceId,
     string BranchId,
-    string ReasonCode);
+    string ReasonCode,
+    string? PartnerId = null,
+    string? ProductId = null,
+    decimal Quantity = 0,
+    string? Unit = null,
+    string? Note = null);
 
 public sealed record GeneratedDocumentDto(
     string Id,
@@ -163,3 +189,109 @@ public sealed record GeneratedDocumentDto(
     string Status,
     string DetailUrl,
     string Message);
+
+public sealed record CatalogSectionDto(
+    string Id,
+    string Title,
+    string Description,
+    IReadOnlyList<SelectOptionDto> Options,
+    bool IsRequiredForOperations = true);
+
+public sealed record TraceabilityNodeDto(
+    string Id,
+    string Stage,
+    string Label,
+    string Lot,
+    string Quantity,
+    string Status,
+    string Timestamp,
+    string Owner,
+    IReadOnlyList<DocumentFieldDto> Facts);
+
+public sealed record TraceabilityResponseDto(
+    string MainLot,
+    string ProductFamily,
+    string Summary,
+    IReadOnlyList<TraceabilityNodeDto> Nodes);
+
+public sealed record WorkQueueItemDto(
+    string Id,
+    string Module,
+    string Priority,
+    string Title,
+    string Branch,
+    string OwnerRole,
+    string DueText,
+    string SuggestedAction,
+    string Status);
+
+public sealed record QualityCheckDto(
+    string Id,
+    string Lot,
+    string CheckPoint,
+    string Protein,
+    string BranchOrPlant,
+    string Result,
+    string Limit,
+    string Status,
+    string Action);
+
+public sealed record ReportDefinitionDto(
+    string Id,
+    string Title,
+    string Description,
+    IReadOnlyList<SelectOptionDto> GroupOptions,
+    IReadOnlyList<SelectOptionDto> FilterOptions,
+    IReadOnlyList<SmartColumnDto> Columns);
+
+public sealed record ReportResultDto(
+    string Id,
+    string Title,
+    IReadOnlyList<string> AppliedFilters,
+    IReadOnlyList<ReportMetricDto> Metrics,
+    IReadOnlyList<Dictionary<string, string>> Rows);
+
+public sealed record ReportMetricDto(
+    string Label,
+    string Value,
+    string Hint,
+    string Tone);
+
+public sealed record IntegrationQueueItemDto(
+    string Id,
+    string TargetSystem,
+    string DocumentNo,
+    string IdempotencyKey,
+    string State,
+    string LastAttempt,
+    string ErrorMessage);
+
+
+public sealed record RolePermissionDto(
+    string Role,
+    string Scope,
+    string Description,
+    IReadOnlyList<string> Permissions,
+    IReadOnlyList<string> DataScopes);
+
+public sealed record BranchAccessDto(
+    string BranchId,
+    string BranchName,
+    string Region,
+    string Users,
+    string DataIsolation,
+    string ApprovalLimit,
+    IReadOnlyList<string> Modules);
+
+public sealed record ModuleProgressDto(
+    string Module,
+    string Status,
+    int Done,
+    string Remaining,
+    string NextCodeArea);
+
+public sealed record SecurityModelDto(
+    IReadOnlyList<RolePermissionDto> Roles,
+    IReadOnlyList<BranchAccessDto> BranchScopes,
+    IReadOnlyList<ModuleProgressDto> ModuleProgress,
+    IReadOnlyList<string> GuardRails);

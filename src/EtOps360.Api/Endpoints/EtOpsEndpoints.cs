@@ -38,6 +38,53 @@ public static class EtOpsEndpoints
         })
         .WithName("GetOperations");
 
+        api.MapGet("/operations/{id}", async (
+            string id,
+            IEtOpsReadModel readModel,
+            CancellationToken cancellationToken) =>
+        {
+            var operation = await readModel.GetOperationAsync(id, cancellationToken);
+            return operation is null ? Results.NotFound() : Results.Ok(operation);
+        })
+        .WithName("GetOperationDetail");
+
+        api.MapGet("/traceability", async (
+            string? branchId,
+            string? protein,
+            string? period,
+            string? search,
+            IEtOpsReadModel readModel,
+            CancellationToken cancellationToken) =>
+        {
+            var query = new EtOpsQuery(branchId ?? "all", protein ?? "all", period ?? "today", search ?? "");
+            return Results.Ok(await readModel.GetTraceabilityAsync(query, cancellationToken));
+        })
+        .WithName("GetTraceability");
+
+        api.MapGet("/work-queue", async (
+            string? branchId,
+            string? protein,
+            string? period,
+            IEtOpsReadModel readModel,
+            CancellationToken cancellationToken) =>
+        {
+            var query = new EtOpsQuery(branchId ?? "all", protein ?? "all", period ?? "today");
+            return Results.Ok(await readModel.GetWorkQueueAsync(query, cancellationToken));
+        })
+        .WithName("GetWorkQueue");
+
+        api.MapGet("/quality", async (
+            string? branchId,
+            string? protein,
+            string? period,
+            IEtOpsReadModel readModel,
+            CancellationToken cancellationToken) =>
+        {
+            var query = new EtOpsQuery(branchId ?? "all", protein ?? "all", period ?? "today");
+            return Results.Ok(await readModel.GetQualityChecksAsync(query, cancellationToken));
+        })
+        .WithName("GetQualityChecks");
+
         api.MapGet("/reconciliation", async (
             string? branchId,
             string? protein,
@@ -81,6 +128,36 @@ public static class EtOpsEndpoints
             return Results.Created($"/api/documents/{result.Id}", result);
         })
         .WithName("GenerateDocument");
+
+        api.MapGet("/catalogs", async (IEtOpsReadModel readModel, CancellationToken cancellationToken) =>
+            Results.Ok(await readModel.GetCatalogsAsync(cancellationToken)))
+            .WithName("GetCatalogs");
+
+        api.MapGet("/reports", async (IEtOpsReadModel readModel, CancellationToken cancellationToken) =>
+            Results.Ok(await readModel.GetReportDefinitionsAsync(cancellationToken)))
+            .WithName("GetReportDefinitions");
+
+        api.MapGet("/reports/{reportId}/result", async (
+            string reportId,
+            string? branchId,
+            string? protein,
+            string? period,
+            string? search,
+            IEtOpsReadModel readModel,
+            CancellationToken cancellationToken) =>
+        {
+            var query = new EtOpsQuery(branchId ?? "all", protein ?? "all", period ?? "today", search ?? "");
+            return Results.Ok(await readModel.GetReportResultAsync(reportId, query, cancellationToken));
+        })
+        .WithName("GetReportResult");
+
+        api.MapGet("/integration-queue", async (IEtOpsReadModel readModel, CancellationToken cancellationToken) =>
+            Results.Ok(await readModel.GetIntegrationQueueAsync(cancellationToken)))
+            .WithName("GetIntegrationQueue");
+
+        api.MapGet("/security-model", async (IEtOpsReadModel readModel, CancellationToken cancellationToken) =>
+            Results.Ok(await readModel.GetSecurityModelAsync(cancellationToken)))
+            .WithName("GetSecurityModel");
 
         return app;
     }

@@ -1,36 +1,47 @@
 import {
   Banknote,
   Boxes,
+  ClipboardList,
+  DatabaseZap,
   FileText,
   Gauge,
   LockKeyhole,
   LogOut,
   Route,
+  UserCog,
+  Settings2,
   ShieldCheck,
   Store,
+  Truck,
   Utensils,
 } from 'lucide-react'
 import type { ReactNode } from 'react'
-import type { Bootstrap, EtOpsFilters } from '../types/etops'
+import type { Bootstrap, EtOpsFilters, ModuleId } from '../types/etops'
 import { ComboField } from './ComboField'
 
 type ShellProps = {
   bootstrap: Bootstrap
   filters: EtOpsFilters
+  activeModule: ModuleId
+  onModuleChange: (module: ModuleId) => void
   onFilterChange: (filters: EtOpsFilters) => void
   onLogout: () => void
   children: ReactNode
 }
 
-const navItems = [
-  { label: 'Kontrol', icon: Gauge },
-  { label: 'Siparis', icon: Store },
-  { label: 'Uretim', icon: Utensils },
-  { label: 'WMS', icon: Boxes },
-  { label: 'Sevkiyat', icon: Route },
-  { label: 'Mutabakat', icon: Banknote },
-  { label: 'Kalite', icon: ShieldCheck },
-  { label: 'Evrak', icon: FileText },
+const navItems: Array<{ id: ModuleId; label: string; icon: typeof Gauge; permission?: string }> = [
+  { id: 'dashboard', label: 'Kontrol', icon: Gauge },
+  { id: 'operations', label: 'Siparis', icon: Store },
+  { id: 'production', label: 'Uretim', icon: Utensils },
+  { id: 'wms', label: 'WMS', icon: Boxes },
+  { id: 'shipment', label: 'Sevkiyat', icon: Truck },
+  { id: 'reconciliation', label: 'Mutabakat', icon: Banknote, permission: 'reconciliation:close' },
+  { id: 'quality', label: 'Kalite', icon: ShieldCheck, permission: 'quality:hold' },
+  { id: 'documents', label: 'Evrak', icon: FileText, permission: 'documents:generate' },
+  { id: 'catalogs', label: 'Kartlar', icon: Settings2, permission: 'catalogs:manage' },
+  { id: 'reports', label: 'Rapor', icon: ClipboardList, permission: 'reports:view' },
+  { id: 'integrations', label: 'Kuyruk', icon: DatabaseZap, permission: 'integrations:queue' },
+  { id: 'security', label: 'Yetki', icon: UserCog, permission: 'security:manage' },
 ]
 
 const periods = [
@@ -40,7 +51,16 @@ const periods = [
   { id: 'quarter', label: 'Ceyrek' },
 ]
 
-export function Shell({ bootstrap, filters, onFilterChange, onLogout, children }: ShellProps) {
+export function Shell({
+  bootstrap,
+  filters,
+  activeModule,
+  onModuleChange,
+  onFilterChange,
+  onLogout,
+  children,
+}: ShellProps) {
+  const permissions = bootstrap.session.permissions ?? []
   const setFilter = (key: keyof EtOpsFilters, value: string) => {
     onFilterChange({ ...filters, [key]: value })
   }
@@ -57,12 +77,19 @@ export function Shell({ bootstrap, filters, onFilterChange, onLogout, children }
         </div>
 
         <nav className="nav-list" aria-label="Ana modul navigasyonu">
-          {navItems.map((item) => (
-            <button type="button" key={item.label} className="nav-item">
-              <item.icon size={18} />
-              {item.label}
-            </button>
-          ))}
+          {navItems
+            .filter((item) => !item.permission || permissions.includes(item.permission))
+            .map((item) => (
+              <button
+                type="button"
+                key={item.id}
+                className={activeModule === item.id ? 'nav-item nav-item--active' : 'nav-item'}
+                onClick={() => onModuleChange(item.id)}
+              >
+                <item.icon size={18} />
+                {item.label}
+              </button>
+            ))}
         </nav>
 
         <div className="security-card">
@@ -77,8 +104,8 @@ export function Shell({ bootstrap, filters, onFilterChange, onLogout, children }
       <main className="main-shell">
         <header className="topbar">
           <div>
-            <p className="eyebrow">Merkezi operasyon kontrolu</p>
-            <h1>Karkastan kasaya tum zincir tek ekranda</h1>
+            <p className="eyebrow">Merkezi operasyon kontrolü · Sprint 02</p>
+            <h1>Karkastan kasaya tüm zincir, yetki, evrak ve mutabakat tek ekranda</h1>
           </div>
           <div className="user-card">
             <span>{bootstrap.session.userName}</span>
@@ -121,6 +148,10 @@ export function Shell({ bootstrap, filters, onFilterChange, onLogout, children }
               placeholder="Lot, evrak, urun veya sube"
             />
           </label>
+          <button type="button" className="chain-badge" onClick={() => onModuleChange('dashboard')}>
+            <Route size={16} />
+            Karkas → Üretim → Şube → POS → Banka → Logo
+          </button>
         </section>
 
         {children}

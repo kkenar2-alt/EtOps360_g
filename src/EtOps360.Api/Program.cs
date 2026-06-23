@@ -35,6 +35,5 @@ app.MapGet("/", () => Results.Ok(new
 
 app.MapAuthEndpoints();
 app.MapEtOpsEndpoints();
-app.MapControlTowerEndpoints();
 
 app.Run();
