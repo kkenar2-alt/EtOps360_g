@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.8" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\EtOps360.Application\EtOps360.Application.csproj" />
+    <ProjectReference Include="..\EtOps360.Infrastructure\EtOps360.Infrastructure.csproj" />
+    <ProjectReference Include="..\EtOps360.Contracts\EtOps360.Contracts.csproj" />
+  </ItemGroup>
+
+</Project>

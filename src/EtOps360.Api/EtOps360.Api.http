@@ -1,0 +1,6 @@
+@EtOps360.Api_HostAddress = http://localhost:5096
+
+GET {{EtOps360.Api_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
