@@ -1,0 +1,1032 @@
+diff -ruN --exclude node_modules --exclude dist --exclude bin --exclude obj EtOps360_sprint01_orig/EtOps360_v02/CALISTIR_API.bat EtOps360_work/EtOps360_v02/CALISTIR_API.bat
+--- EtOps360_sprint01_orig/EtOps360_v02/CALISTIR_API.bat	1970-01-01 00:00:00.000000000 +0000
++++ EtOps360_work/EtOps360_v02/CALISTIR_API.bat	2026-06-23 11:29:49.520935698 +0000
+@@ -0,0 +1,7 @@
++@echo off
++cd /d C:\Users\mentis\Documents\Codex\EtOps360
++taskkill /IM EtOps360.Api.exe /F 2>nul
++taskkill /IM dotnet.exe /F 2>nul
++dotnet restore
++dotnet run --project .\src\EtOps360.Api\EtOps360.Api.csproj --launch-profile http
++pause
+diff -ruN --exclude node_modules --exclude dist --exclude bin --exclude obj EtOps360_sprint01_orig/EtOps360_v02/CALISTIR_WEB.bat EtOps360_work/EtOps360_v02/CALISTIR_WEB.bat
+--- EtOps360_sprint01_orig/EtOps360_v02/CALISTIR_WEB.bat	1970-01-01 00:00:00.000000000 +0000
++++ EtOps360_work/EtOps360_v02/CALISTIR_WEB.bat	2026-06-23 11:29:49.542103011 +0000
+@@ -0,0 +1,6 @@
++@echo off
++cd /d C:\Users\mentis\Documents\Codex\EtOps360\src\web
++taskkill /IM node.exe /F 2>nul
++npm install
++npm run dev
++pause
+diff -ruN --exclude node_modules --exclude dist --exclude bin --exclude obj EtOps360_sprint01_orig/EtOps360_v02/GITHUB_GUNCELLE.bat EtOps360_work/EtOps360_v02/GITHUB_GUNCELLE.bat
+--- EtOps360_sprint01_orig/EtOps360_v02/GITHUB_GUNCELLE.bat	2026-06-23 10:52:14.000000000 +0000
++++ EtOps360_work/EtOps360_v02/GITHUB_GUNCELLE.bat	2026-06-23 11:29:49.494495552 +0000
+@@ -1,12 +1,21 @@
+ @echo off
+-setlocal
+-cd /d %~dp0
++cd /d C:\Users\mentis\Documents\Codex\EtOps360
++
++echo Eski calisan API/Frontend varsa kapatiliyor...
++taskkill /IM EtOps360.Api.exe /F 2>nul
++taskkill /IM dotnet.exe /F 2>nul
++taskkill /IM node.exe /F 2>nul
++
++echo GitHub guncelleme basliyor...
++git init
++git branch -M main
++git remote remove origin 2>nul
++git remote add origin https://github.com/kkenar2-alt/EtOps360_g.git
+ 
+-echo EtOps360 GitHub guncelleme basliyor...
+-git status
+ git add .
+-git commit -m "EtOps360 sprint 01 guncellemesi"
+-git push
++git commit -m "EtOps360 sprint guncelleme"
++git push -u origin main --force
+ 
++echo.
+ echo Bitti.
+ pause
+diff -ruN --exclude node_modules --exclude dist --exclude bin --exclude obj EtOps360_sprint01_orig/EtOps360_v02/SPRINT_02_DEGISIKLIK_OZETI.md EtOps360_work/EtOps360_v02/SPRINT_02_DEGISIKLIK_OZETI.md
+--- EtOps360_sprint01_orig/EtOps360_v02/SPRINT_02_DEGISIKLIK_OZETI.md	1970-01-01 00:00:00.000000000 +0000
++++ EtOps360_work/EtOps360_v02/SPRINT_02_DEGISIKLIK_OZETI.md	2026-06-23 11:29:49.579944819 +0000
+@@ -0,0 +1,23 @@
++# Sprint 02 Değişiklik Özeti
++
++## Görünür ekran değişiklikleri
++
++- Ana kontrol ekranına Sprint 02 banner eklendi.
++- Sol menüye Yetki modülü eklendi.
++- Evrak merkezi ürün/stok combosu, açıklama alanı ve daha net detay akışıyla genişletildi.
++- Kartlar tarafına ürün ve stok kartları eklendi.
++- Tablolar mevcut yapı korunarak filtrelenebilir, gruplanabilir, CSV alınabilir ve kolon genişliği elle ayarlanabilir kaldı.
++
++## Backend değişiklikleri
++
++- `/api/security-model` endpoint'i eklendi.
++- `SecurityModelDto`, rol matrisi, şube veri kapsamı, modül ilerleme ve guard rail kayıtları eklendi.
++- Bootstrap içine `productMasters` eklendi.
++- Entegrasyonsuz evrak oluşturma isteği ürün, miktar, birim ve açıklama ile genişletildi.
++
++## İş ilkeleri
++
++- Logo Tiger 3'e doğrudan kontrolsüz insert/update yapılmaz.
++- Onaylı taslak + outbox + idempotency modeli korunur.
++- Şube kullanıcısı kendi şubesine, bölge kullanıcısı kendi bölgesine, merkez kullanıcısı tüm zincire yetkilendirilir.
++- Kırmızı et, beyaz et, işlenmiş et, balık/deniz ürünleri ve yan ürünler aynı katalog mantığında izlenir.
+diff -ruN --exclude node_modules --exclude dist --exclude bin --exclude obj EtOps360_sprint01_orig/EtOps360_v02/docs/SPRINT-02-YETKI-EVRAK-RAPOR.md EtOps360_work/EtOps360_v02/docs/SPRINT-02-YETKI-EVRAK-RAPOR.md
+--- EtOps360_sprint01_orig/EtOps360_v02/docs/SPRINT-02-YETKI-EVRAK-RAPOR.md	1970-01-01 00:00:00.000000000 +0000
++++ EtOps360_work/EtOps360_v02/docs/SPRINT-02-YETKI-EVRAK-RAPOR.md	2026-06-23 11:30:56.424994197 +0000
+@@ -0,0 +1,27 @@
++# Sprint 02 - Yetki, Evrak ve Rapor Omurgası
++
++Bu sprintin hedefi, kullanıcının ekranda doğrudan fark edeceği kontrol kulesi genişlemesini üretmektir.
++
++## Ekranda gelenler
++
++- Kontrol ekranında Sprint 02 vurgulu görünür banner.
++- Yetki modülü: rol matrisi, şube veri izolasyonu, modül tamamlanma durumu ve guard rail listesi.
++- Evrak merkezi: ürün/stok, şube, partner, neden, miktar, birim ve açıklama seçimleriyle entegre olmayan firmalar için baştan sona taslak üretim.
++- Ürün kartları: kırmızı et, beyaz et, işlenmiş et, balık/deniz ürünleri ve yan ürünler aynı katalog modelinde.
++- Rapor tabloları: mevcut filtreleme, gruplama, CSV ve kolon genişliği ayarları korunur.
++
++## Teknik değişiklikler
++
++- `EtOpsBootstrapDto.productMasters` eklendi.
++- `/api/security-model` endpoint'i eklendi.
++- `SecurityWorkspace` frontend modülü eklendi.
++- `ModuleId` içine `security` eklendi.
++- Merkez planlama profilinde güvenlik, kalite ve mutabakat yetkileri genişletildi.
++
++## Sonraki sprint için temel
++
++- SQL Server veri modeli.
++- Audit log ve object-level authorization.
++- Logo outbox tablosu.
++- Banka/POS dosya import parser iskeleti.
++- Evrak onay aksiyonları.
+diff -ruN --exclude node_modules --exclude dist --exclude bin --exclude obj EtOps360_sprint01_orig/EtOps360_v02/src/EtOps360.Api/Endpoints/EtOpsEndpoints.cs EtOps360_work/EtOps360_v02/src/EtOps360.Api/Endpoints/EtOpsEndpoints.cs
+--- EtOps360_sprint01_orig/EtOps360_v02/src/EtOps360.Api/Endpoints/EtOpsEndpoints.cs	2026-06-23 10:47:28.000000000 +0000
++++ EtOps360_work/EtOps360_v02/src/EtOps360.Api/Endpoints/EtOpsEndpoints.cs	2026-06-23 11:25:26.487535221 +0000
+@@ -155,6 +155,10 @@
+             Results.Ok(await readModel.GetIntegrationQueueAsync(cancellationToken)))
+             .WithName("GetIntegrationQueue");
+ 
++        api.MapGet("/security-model", async (IEtOpsReadModel readModel, CancellationToken cancellationToken) =>
++            Results.Ok(await readModel.GetSecurityModelAsync(cancellationToken)))
++            .WithName("GetSecurityModel");
++
+         return app;
+     }
+ }
+diff -ruN --exclude node_modules --exclude dist --exclude bin --exclude obj EtOps360_sprint01_orig/EtOps360_v02/src/EtOps360.Application/Abstractions/IEtOpsReadModel.cs EtOps360_work/EtOps360_v02/src/EtOps360.Application/Abstractions/IEtOpsReadModel.cs
+--- EtOps360_sprint01_orig/EtOps360_v02/src/EtOps360.Application/Abstractions/IEtOpsReadModel.cs	2026-06-23 10:45:18.000000000 +0000
++++ EtOps360_work/EtOps360_v02/src/EtOps360.Application/Abstractions/IEtOpsReadModel.cs	2026-06-23 11:25:26.486650307 +0000
+@@ -35,4 +35,6 @@
+     Task<ReportResultDto> GetReportResultAsync(string reportId, EtOpsQuery query, CancellationToken cancellationToken);
+ 
+     Task<IReadOnlyList<IntegrationQueueItemDto>> GetIntegrationQueueAsync(CancellationToken cancellationToken);
++
++    Task<SecurityModelDto> GetSecurityModelAsync(CancellationToken cancellationToken);
+ }
+diff -ruN --exclude node_modules --exclude dist --exclude bin --exclude obj EtOps360_sprint01_orig/EtOps360_v02/src/EtOps360.Contracts/Dashboard/EtOpsDtos.cs EtOps360_work/EtOps360_v02/src/EtOps360.Contracts/Dashboard/EtOpsDtos.cs
+--- EtOps360_sprint01_orig/EtOps360_v02/src/EtOps360.Contracts/Dashboard/EtOpsDtos.cs	2026-06-23 10:45:08.000000000 +0000
++++ EtOps360_work/EtOps360_v02/src/EtOps360.Contracts/Dashboard/EtOpsDtos.cs	2026-06-23 11:25:26.485843549 +0000
+@@ -49,6 +49,7 @@
+     IReadOnlyList<SelectOptionDto> Units,
+     IReadOnlyList<SelectOptionDto> ProcessTypes,
+     IReadOnlyList<SelectOptionDto> Partners,
++    IReadOnlyList<SelectOptionDto> ProductMasters,
+     IReadOnlyList<SmartColumnDto> OperationColumns);
+ 
+ public sealed record SmartColumnDto(
+@@ -264,3 +265,33 @@
+     string State,
+     string LastAttempt,
+     string ErrorMessage);
++
++
++public sealed record RolePermissionDto(
++    string Role,
++    string Scope,
++    string Description,
++    IReadOnlyList<string> Permissions,
++    IReadOnlyList<string> DataScopes);
++
++public sealed record BranchAccessDto(
++    string BranchId,
++    string BranchName,
++    string Region,
++    string Users,
++    string DataIsolation,
++    string ApprovalLimit,
++    IReadOnlyList<string> Modules);
++
++public sealed record ModuleProgressDto(
++    string Module,
++    string Status,
++    int Done,
++    string Remaining,
++    string NextCodeArea);
++
++public sealed record SecurityModelDto(
++    IReadOnlyList<RolePermissionDto> Roles,
++    IReadOnlyList<BranchAccessDto> BranchScopes,
++    IReadOnlyList<ModuleProgressDto> ModuleProgress,
++    IReadOnlyList<string> GuardRails);
+diff -ruN --exclude node_modules --exclude dist --exclude bin --exclude obj EtOps360_sprint01_orig/EtOps360_v02/src/EtOps360.Infrastructure/ReadModels/SeededEtOpsAuthService.cs EtOps360_work/EtOps360_v02/src/EtOps360.Infrastructure/ReadModels/SeededEtOpsAuthService.cs
+--- EtOps360_sprint01_orig/EtOps360_v02/src/EtOps360.Infrastructure/ReadModels/SeededEtOpsAuthService.cs	2026-06-23 10:45:34.000000000 +0000
++++ EtOps360_work/EtOps360_v02/src/EtOps360.Infrastructure/ReadModels/SeededEtOpsAuthService.cs	2026-06-23 11:26:07.244863979 +0000
+@@ -24,7 +24,7 @@
+             "Merkez Planlama",
+             ["all", "merkez", "bursa-12", "ankara-04", "izmir-08", "antalya-03"],
+             "all",
+-            ["dashboard:view", "operations:approve", "documents:generate", "reports:view", "catalogs:manage", "integrations:queue"]),
++            ["dashboard:view", "operations:approve", "documents:generate", "reports:view", "catalogs:manage", "integrations:queue", "security:manage", "quality:hold", "reconciliation:close"]),
+         new(
+             "bolge.marmara",
+             "Marmara Bolge Muduru",
+diff -ruN --exclude node_modules --exclude dist --exclude bin --exclude obj EtOps360_sprint01_orig/EtOps360_v02/src/EtOps360.Infrastructure/ReadModels/SeededEtOpsReadModel.cs EtOps360_work/EtOps360_v02/src/EtOps360.Infrastructure/ReadModels/SeededEtOpsReadModel.cs
+--- EtOps360_sprint01_orig/EtOps360_v02/src/EtOps360.Infrastructure/ReadModels/SeededEtOpsReadModel.cs	2026-06-23 10:47:10.000000000 +0000
++++ EtOps360_work/EtOps360_v02/src/EtOps360.Infrastructure/ReadModels/SeededEtOpsReadModel.cs	2026-06-23 11:27:48.673249933 +0000
+@@ -84,6 +84,18 @@
+         new("tedarikci-manuel", "Entegrasyonsuz tedarikci", "Tedarik")
+     ];
+ 
++    private static readonly IReadOnlyList<SelectOptionDto> ProductMasters =
++    [
++        new("kofte-180", "Kofte 180 gr", "Kirmizi et"),
++        new("doner-yaprak", "Doner yaprak", "Kirmizi et"),
++        new("tavuk-sis", "Tavuk sis", "Beyaz et"),
++        new("tavuk-but", "Tavuk but fileto", "Beyaz et"),
++        new("sucuk-vakum", "Sucuk vakum", "Islenmis et"),
++        new("balik-fileto", "Balik fileto", "Balik ve deniz urunleri"),
++        new("ayran-300", "Ayran 300 ml", "Ekmek, sut urunleri ve yan urun"),
++        new("ekmek", "Ekmek", "Ekmek, sut urunleri ve yan urun")
++    ];
++
+     private static readonly IReadOnlyList<SmartColumnDto> OperationColumns =
+     [
+         new("branch", "Sube", 110, 150, true, true),
+@@ -140,7 +152,7 @@
+             "Merkez Planlama",
+             "all",
+             Branches.Select(x => x.Id).ToArray(),
+-            ["dashboard:view", "operations:approve", "documents:generate", "reports:view", "catalogs:manage", "integrations:queue"]);
++            ["dashboard:view", "operations:approve", "documents:generate", "reports:view", "catalogs:manage", "integrations:queue", "security:manage", "quality:hold", "reconciliation:close"]);
+ 
+         return GetBootstrapAsync(defaultSession, cancellationToken);
+     }
+@@ -156,6 +168,7 @@
+             Units,
+             ProcessTypes,
+             Partners,
++            ProductMasters,
+             OperationColumns);
+ 
+         return Task.FromResult(dto);
+@@ -318,7 +331,7 @@
+             documentNo,
+             "Taslak olustu",
+             $"/documents/{id}",
+-            "Evrak taslagi tiklama ile olusturuldu; detay ekranindan satirlar, lotlar, tutarlar ve onay akisi acilabilir.");
++            $"Evrak taslagi tiklama ile olusturuldu; urun={request.ProductId ?? "secili degil"}, miktar={request.Quantity:N2} {request.Unit ?? ""}. Detay ekranindan satirlar, lotlar, tutarlar ve onay akisi acilabilir.");
+ 
+         return Task.FromResult(dto);
+     }
+@@ -332,6 +345,7 @@
+             new("processes", "Surec kartlari", "Karkas kabulden Logo aktarimina kadar standart akisi belirler.", ProcessTypes, true),
+             new("documents", "Evrak tipleri", "Entegrasyon yoksa combodan secimle taslak evrak uretir.", DocumentTypes, true),
+             new("reasons", "Fire, iade ve fark nedenleri", "Elle aciklama yerine standart neden kartlariyla raporlanir.", ReasonCodes, true),
++            new("products", "Urun ve stok kartlari", "Kirmizi et, beyaz et, islenmis et, balik ve yan urunler ayni katalogdan secilir.", ProductMasters, true),
+             new("partners", "Entegrasyon partnerleri", "Logo, banka, yemek karti, online platform ve manuel tedarikci kartlari.", Partners, false),
+             new("units", "Birimler", "kg, adet, koli, tepsi ve litre donusumleri icin temel liste.", Units, true)
+         ];
+@@ -436,6 +450,51 @@
+         return Task.FromResult(rows);
+     }
+ 
++    public Task<SecurityModelDto> GetSecurityModelAsync(CancellationToken cancellationToken)
++    {
++        var roles = new List<RolePermissionDto>
++        {
++            new("Merkez Planlama", "Tum zincir", "Genel katalog, operasyon, evrak, Logo kuyrugu ve rapor yonetimi.", ["dashboard:view", "operations:approve", "documents:generate", "reports:view", "catalogs:manage", "integrations:queue", "security:manage"], ["all", "merkez", "bolge", "sube"]),
++            new("Bolge Muduru", "Bolge subeleri", "Sube siparis, fire/iade ve bolge onaylari.", ["dashboard:view", "operations:approve", "documents:generate", "reports:view"], ["bolge", "sube"]),
++            new("Sube Muduru", "Kendi subesi", "Sadece kendi subesinin siparis, fire, iade ve evrak girisi.", ["dashboard:view", "documents:generate"], ["sube"]),
++            new("Finans", "Odeme ve mutabakat", "POS, banka, yemek karti, online odeme ve Logo muhasebe kuyrugu.", ["dashboard:view", "reconciliation:close", "documents:generate", "integrations:queue"], ["finans", "sube"]),
++            new("Kalite", "Lot ve blokaj", "HACCP/CCP/OPRP, numune, DÖF/CAPA ve geri cagirma simülasyonu.", ["dashboard:view", "quality:hold", "documents:generate", "reports:view"], ["merkez", "sube", "lot"])
++        };
++
++        var branchScopes = Branches.Where(branch => branch.Id != "all").Select(branch => new BranchAccessDto(
++            branch.Id,
++            branch.Label,
++            branch.Group ?? "Genel",
++            branch.Id == "merkez" ? "Planlama, uretim, kalite, depo" : "Sube muduru, bolge, finans",
++            branch.Id == "merkez" ? "Uretim ve lot bazli" : "Sadece kendi sube verisi",
++            branch.Id == "merkez" ? "Sinirsiz / iki onay" : "Fire > %2 ve fark > 1 kg bolge onayi",
++            branch.Id == "merkez"
++                ? ["Karkas", "Uretim", "WMS", "Kalite", "Logo"]
++                : ["Siparis", "Kabul", "Fire/Iade", "POS", "Mutabakat"]
++        )).ToArray();
++
++        IReadOnlyList<ModuleProgressDto> progress =
++        [
++            new("Cekirdek operasyon", "Kodlandi", 72, "SQL kalici veri ve onay aksiyonlari", "Application/Operations"),
++            new("Karkas - uretim - randiman", "Kodlandi", 48, "Terazi adaptoru ve gercek lot hareketleri", "Infrastructure/Scales"),
++            new("WMS ve soguk zincir", "Taslak tamam", 36, "FEFO motoru ve sensor import", "Application/Wms"),
++            new("POS ve banka mutabakati", "Taslak tamam", 42, "Banka dosya parser ve kapama robotu", "Application/Reconciliation"),
++            new("Kalite ve zeka", "Taslak tamam", 34, "CAPA, anomali ve tahmin modelleri", "Application/Quality"),
++            new("Yetki ve audit", "Kodlandi", 55, "JWT, object-level authorization, SQL audit", "Api/Security")
++        ];
++
++        IReadOnlyList<string> guardRails =
++        [
++            "Logo Tiger 3 veritabanina kontrolsuz insert/update yok; onayli taslak + outbox + idempotency zorunlu.",
++            "Kart PAN/CVV saklanmaz; banka mutabakati sadece provizyon, terminal, tutar ve komisyon verisi tutar.",
++            "Her hareket sourceSystem, sourceId, idempotencyKey, branchId, lotId, createdBy, approvedBy ve auditHash tasir.",
++            "Sube kullanicisi sadece kendi subesinin evrak ve hareketlerini gorur; merkez/bolge rolleri veri kapsami ile sinirlanir.",
++            "Silme yerine pasifleştirme ve audit trail kullanilir; denetim izi kullanici ekranindan kaldirilamaz."
++        ];
++
++        return Task.FromResult(new SecurityModelDto(roles, branchScopes, progress, guardRails));
++    }
++
+     private static IReadOnlyList<TraceabilityNodeDto> CreateTraceabilityNodes(string lot)
+     {
+         return
+diff -ruN --exclude node_modules --exclude dist --exclude bin --exclude obj EtOps360_sprint01_orig/EtOps360_v02/src/web/package-lock.json EtOps360_work/EtOps360_v02/src/web/package-lock.json
+--- EtOps360_sprint01_orig/EtOps360_v02/src/web/package-lock.json	2026-06-23 07:58:14.000000000 +0000
++++ EtOps360_work/EtOps360_v02/src/web/package-lock.json	2026-06-23 11:28:37.173202498 +0000
+@@ -695,9 +695,6 @@
+       "cpu": [
+         "arm64"
+       ],
+-      "libc": [
+-        "glibc"
+-      ],
+       "license": "MIT",
+       "optional": true,
+       "os": [
+@@ -714,9 +711,6 @@
+       "cpu": [
+         "arm64"
+       ],
+-      "libc": [
+-        "musl"
+-      ],
+       "license": "MIT",
+       "optional": true,
+       "os": [
+@@ -733,9 +727,6 @@
+       "cpu": [
+         "ppc64"
+       ],
+-      "libc": [
+-        "glibc"
+-      ],
+       "license": "MIT",
+       "optional": true,
+       "os": [
+@@ -752,9 +743,6 @@
+       "cpu": [
+         "s390x"
+       ],
+-      "libc": [
+-        "glibc"
+-      ],
+       "license": "MIT",
+       "optional": true,
+       "os": [
+@@ -771,9 +759,6 @@
+       "cpu": [
+         "x64"
+       ],
+-      "libc": [
+-        "glibc"
+-      ],
+       "license": "MIT",
+       "optional": true,
+       "os": [
+@@ -790,9 +775,6 @@
+       "cpu": [
+         "x64"
+       ],
+-      "libc": [
+-        "musl"
+-      ],
+       "license": "MIT",
+       "optional": true,
+       "os": [
+@@ -1011,9 +993,6 @@
+       "cpu": [
+         "arm64"
+       ],
+-      "libc": [
+-        "glibc"
+-      ],
+       "license": "MIT",
+       "optional": true,
+       "os": [
+@@ -1030,9 +1009,6 @@
+       "cpu": [
+         "arm64"
+       ],
+-      "libc": [
+-        "musl"
+-      ],
+       "license": "MIT",
+       "optional": true,
+       "os": [
+@@ -1049,9 +1025,6 @@
+       "cpu": [
+         "x64"
+       ],
+-      "libc": [
+-        "glibc"
+-      ],
+       "license": "MIT",
+       "optional": true,
+       "os": [
+@@ -1068,9 +1041,6 @@
+       "cpu": [
+         "x64"
+       ],
+-      "libc": [
+-        "musl"
+-      ],
+       "license": "MIT",
+       "optional": true,
+       "os": [
+@@ -2638,9 +2608,6 @@
+       "cpu": [
+         "arm64"
+       ],
+-      "libc": [
+-        "glibc"
+-      ],
+       "license": "MPL-2.0",
+       "optional": true,
+       "os": [
+@@ -2661,9 +2628,6 @@
+       "cpu": [
+         "arm64"
+       ],
+-      "libc": [
+-        "musl"
+-      ],
+       "license": "MPL-2.0",
+       "optional": true,
+       "os": [
+@@ -2684,9 +2648,6 @@
+       "cpu": [
+         "x64"
+       ],
+-      "libc": [
+-        "glibc"
+-      ],
+       "license": "MPL-2.0",
+       "optional": true,
+       "os": [
+@@ -2707,9 +2668,6 @@
+       "cpu": [
+         "x64"
+       ],
+-      "libc": [
+-        "musl"
+-      ],
+       "license": "MPL-2.0",
+       "optional": true,
+       "os": [
+diff -ruN --exclude node_modules --exclude dist --exclude bin --exclude obj EtOps360_sprint01_orig/EtOps360_v02/src/web/src/App.tsx EtOps360_work/EtOps360_v02/src/web/src/App.tsx
+--- EtOps360_sprint01_orig/EtOps360_v02/src/web/src/App.tsx	2026-06-23 10:50:04.000000000 +0000
++++ EtOps360_work/EtOps360_v02/src/web/src/App.tsx	2026-06-23 11:26:40.463124297 +0000
+@@ -10,6 +10,7 @@
+ import { QualityWorkspace } from './features/quality/QualityWorkspace'
+ import { ReconciliationPanel } from './features/reconciliation/ReconciliationPanel'
+ import { ReportingWorkspace } from './features/reports/ReportingWorkspace'
++import { SecurityWorkspace } from './features/security/SecurityWorkspace'
+ import { TraceabilityTimeline } from './features/traceability/TraceabilityTimeline'
+ import { WorkQueuePanel } from './features/workqueue/WorkQueuePanel'
+ import { etOpsApi } from './lib/api'
+@@ -27,6 +28,7 @@
+   QualityCheck,
+   ReconciliationRow,
+   ReportDefinition,
++  SecurityModel,
+   TraceabilityResponse,
+   WorkQueueItem,
+ } from './types/etops'
+@@ -43,6 +45,7 @@
+   catalogs: CatalogSection[]
+   reports: ReportDefinition[]
+   integrationQueue: IntegrationQueueItem[]
++  securityModel: SecurityModel
+ }
+ 
+ const createInitialFilters = (session?: LoginResponse | null): EtOpsFilters => ({
+@@ -81,6 +84,7 @@
+         catalogs,
+         reports,
+         integrationQueue,
++        securityModel,
+       ] = await Promise.all([
+         etOpsApi.dashboard(filters),
+         etOpsApi.operations(filters),
+@@ -92,6 +96,7 @@
+         etOpsApi.catalogs(),
+         etOpsApi.reports(),
+         etOpsApi.integrationQueue(),
++        etOpsApi.securityModel(),
+       ])
+ 
+       setData({
+@@ -106,6 +111,7 @@
+         catalogs,
+         reports,
+         integrationQueue,
++        securityModel,
+       })
+     } catch (caught) {
+       setError(caught instanceof Error ? caught.message : 'Bilinmeyen baglanti hatasi')
+@@ -225,6 +231,7 @@
+             reasonCodes={data.bootstrap.reasonCodes}
+             partners={data.bootstrap.partners}
+             units={data.bootstrap.units}
++            products={data.bootstrap.productMasters}
+             filters={filters}
+           />
+         )
+@@ -234,6 +241,8 @@
+         return <ReportingWorkspace definitions={data.reports} filters={filters} />
+       case 'integrations':
+         return <IntegrationQueuePanel rows={data.integrationQueue} />
++      case 'security':
++        return <SecurityWorkspace model={data.securityModel} session={data.bootstrap.session} />
+       default:
+         return (
+           <>
+diff -ruN --exclude node_modules --exclude dist --exclude bin --exclude obj EtOps360_sprint01_orig/EtOps360_v02/src/web/src/components/Shell.tsx EtOps360_work/EtOps360_v02/src/web/src/components/Shell.tsx
+--- EtOps360_sprint01_orig/EtOps360_v02/src/web/src/components/Shell.tsx	2026-06-23 10:48:40.000000000 +0000
++++ EtOps360_work/EtOps360_v02/src/web/src/components/Shell.tsx	2026-06-23 11:27:05.194554242 +0000
+@@ -8,6 +8,7 @@
+   LockKeyhole,
+   LogOut,
+   Route,
++  UserCog,
+   Settings2,
+   ShieldCheck,
+   Store,
+@@ -40,6 +41,7 @@
+   { id: 'catalogs', label: 'Kartlar', icon: Settings2, permission: 'catalogs:manage' },
+   { id: 'reports', label: 'Rapor', icon: ClipboardList, permission: 'reports:view' },
+   { id: 'integrations', label: 'Kuyruk', icon: DatabaseZap, permission: 'integrations:queue' },
++  { id: 'security', label: 'Yetki', icon: UserCog, permission: 'security:manage' },
+ ]
+ 
+ const periods = [
+@@ -102,8 +104,8 @@
+       <main className="main-shell">
+         <header className="topbar">
+           <div>
+-            <p className="eyebrow">Merkezi operasyon kontrolu</p>
+-            <h1>Karkastan kasaya tum zincir tek ekranda</h1>
++            <p className="eyebrow">Merkezi operasyon kontrolü · Sprint 02</p>
++            <h1>Karkastan kasaya tüm zincir, yetki, evrak ve mutabakat tek ekranda</h1>
+           </div>
+           <div className="user-card">
+             <span>{bootstrap.session.userName}</span>
+@@ -148,7 +150,7 @@
+           </label>
+           <button type="button" className="chain-badge" onClick={() => onModuleChange('dashboard')}>
+             <Route size={16} />
+-            Karkas → Sube → POS → Banka → Logo
++            Karkas → Üretim → Şube → POS → Banka → Logo
+           </button>
+         </section>
+ 
+diff -ruN --exclude node_modules --exclude dist --exclude bin --exclude obj EtOps360_sprint01_orig/EtOps360_v02/src/web/src/features/dashboard/DashboardOverview.tsx EtOps360_work/EtOps360_v02/src/web/src/features/dashboard/DashboardOverview.tsx
+--- EtOps360_sprint01_orig/EtOps360_v02/src/web/src/features/dashboard/DashboardOverview.tsx	2026-06-23 08:06:14.000000000 +0000
++++ EtOps360_work/EtOps360_v02/src/web/src/features/dashboard/DashboardOverview.tsx	2026-06-23 11:27:58.671792520 +0000
+@@ -24,6 +24,14 @@
+ export function DashboardOverview({ summary }: DashboardOverviewProps) {
+   return (
+     <section className="dashboard-grid">
++      <div className="sprint-banner">
++        <div>
++          <p className="eyebrow">Sprint 02 görünür sürüm</p>
++          <h2>Karkastan kasaya kontrol kulesi genişledi</h2>
++          <span>Yetki matrisi, ürün/stok kartları, manuel evrak akışı, rapor/CSV ve Logo outbox omurgası aynı ekranda.</span>
++        </div>
++        <strong>02</strong>
++      </div>
+       <div className="kpi-grid">
+         {summary.kpis.map((kpi) => (
+           <article key={kpi.id} className={`kpi-card kpi-card--${kpi.tone}`}>
+diff -ruN --exclude node_modules --exclude dist --exclude bin --exclude obj EtOps360_sprint01_orig/EtOps360_v02/src/web/src/features/documents/DocumentsWorkspace.tsx EtOps360_work/EtOps360_v02/src/web/src/features/documents/DocumentsWorkspace.tsx
+--- EtOps360_sprint01_orig/EtOps360_v02/src/web/src/features/documents/DocumentsWorkspace.tsx	2026-06-23 10:49:40.000000000 +0000
++++ EtOps360_work/EtOps360_v02/src/web/src/features/documents/DocumentsWorkspace.tsx	2026-06-23 11:27:33.114044022 +0000
+@@ -18,10 +18,20 @@
+   reasonCodes: SelectOption[]
+   partners: SelectOption[]
+   units: SelectOption[]
++  products: SelectOption[]
+   filters: EtOpsFilters
+ }
+ 
+-export function DocumentsWorkspace({ documents, documentTypes, branches, reasonCodes, partners, units, filters }: DocumentsWorkspaceProps) {
++export function DocumentsWorkspace({
++  documents,
++  documentTypes,
++  branches,
++  reasonCodes,
++  partners,
++  units,
++  products,
++  filters,
++}: DocumentsWorkspaceProps) {
+   const [selectedDocumentId, setSelectedDocumentId] = useState(documents[0]?.id ?? '')
+   const [detail, setDetail] = useState<DocumentDetail | null>(null)
+   const [generated, setGenerated] = useState<GeneratedDocument | null>(null)
+@@ -31,8 +41,10 @@
+     branchId: filters.branchId === 'all' ? 'bursa-12' : filters.branchId,
+     reasonCode: 'manual-entry',
+     partnerId: partners[0]?.id ?? 'logo',
++    productId: products[0]?.id ?? 'kofte-180',
+     quantity: 1,
+     unit: units[0]?.id ?? 'kg',
++    note: 'Entegrasyonsuz firma icin kontrollu manuel taslak',
+   })
+ 
+   const visibleBranches = useMemo(() => branches.filter((branch) => branch.id !== 'all'), [branches])
+@@ -57,7 +69,7 @@
+         <div className="panel-heading">
+           <div>
+             <p className="eyebrow">Evrak merkezi</p>
+-            <h2>Olusan ve manuel girilen evraklar</h2>
++            <h2>Oluşan ve manuel girilen evraklar</h2>
+           </div>
+           <FolderOpen size={20} />
+         </div>
+@@ -72,6 +84,7 @@
+               <div>
+                 <strong>{document.documentNo}</strong>
+                 <span>{document.type}</span>
++                <small>{document.branch} · {document.partner}</small>
+               </div>
+               <StatusPill value={document.status} />
+             </button>
+@@ -83,7 +96,7 @@
+         <div className="panel-heading">
+           <div>
+             <p className="eyebrow">Tıklama ile detay</p>
+-            <h2>{detail?.title ?? 'Evrak secin'}</h2>
++            <h2>{detail?.title ?? 'Evrak seçin'}</h2>
+           </div>
+           {detail ? <StatusPill value={detail.status} /> : null}
+         </div>
+@@ -94,7 +107,18 @@
+               {detail.fields.map((field) => (
+                 <label key={field.label} className="detail-field">
+                   <span>{field.label}</span>
+-                  <input value={field.value} readOnly={field.kind === 'readonly' || field.kind === 'status'} />
++                  {field.options && field.options.length > 0 ? (
++                    <select defaultValue={field.options.find((option) => option.label === field.value)?.id ?? ''}>
++                      <option value="">{field.value}</option>
++                      {field.options.map((option) => (
++                        <option key={option.id} value={option.id}>
++                          {option.label}
++                        </option>
++                      ))}
++                    </select>
++                  ) : (
++                    <input value={field.value} readOnly />
++                  )}
+                 </label>
+               ))}
+             </div>
+@@ -119,15 +143,15 @@
+             </div>
+           </>
+         ) : (
+-          <div className="empty-state">Evrak detayına ulasilamadi.</div>
++          <div className="empty-state">Evrak detayına ulaşılamadı.</div>
+         )}
+       </div>
+ 
+       <div className="manual-document-panel">
+         <div className="panel-heading">
+           <div>
+-            <p className="eyebrow">Entegrasyonsuz firma akisi</p>
+-            <h2>Tıklama ile evrak oluştur</h2>
++            <p className="eyebrow">Entegrasyonsuz firma akışı</p>
++            <h2>Başından sonuna evrak oluştur</h2>
+           </div>
+           <FilePlus2 size={20} />
+         </div>
+@@ -141,19 +165,25 @@
+         />
+         <ComboField
+           id="document-branch"
+-          label="Sube / nokta"
++          label="Şube / nokta"
+           value={draft.branchId}
+           options={visibleBranches}
+           onChange={(value) => setDraft((current) => ({ ...current, branchId: value }))}
+         />
+         <ComboField
++          id="document-product"
++          label="Ürün / malzeme"
++          value={draft.productId}
++          options={products}
++          onChange={(value) => setDraft((current) => ({ ...current, productId: value }))}
++        />
++        <ComboField
+           id="document-reason"
+           label="Neden"
+           value={draft.reasonCode}
+           options={reasonCodes}
+           onChange={(value) => setDraft((current) => ({ ...current, reasonCode: value }))}
+         />
+-
+         <ComboField
+           id="document-partner"
+           label="Partner / cari"
+@@ -178,10 +208,18 @@
+             onChange={(event) => setDraft((current) => ({ ...current, quantity: Number(event.target.value) }))}
+           />
+         </label>
++        <label className="detail-field detail-field--wide" htmlFor="document-note">
++          <span>Açıklama</span>
++          <textarea
++            id="document-note"
++            value={draft.note}
++            onChange={(event) => setDraft((current) => ({ ...current, note: event.target.value }))}
++          />
++        </label>
+ 
+         <button type="button" className="primary-action" onClick={createDocument}>
+           <WandSparkles size={18} />
+-          Evrak taslagi olustur
++          Evrak taslağı oluştur ve detaya bağla
+         </button>
+ 
+         {generated ? (
+diff -ruN --exclude node_modules --exclude dist --exclude bin --exclude obj EtOps360_sprint01_orig/EtOps360_v02/src/web/src/features/security/SecurityWorkspace.tsx EtOps360_work/EtOps360_v02/src/web/src/features/security/SecurityWorkspace.tsx
+--- EtOps360_sprint01_orig/EtOps360_v02/src/web/src/features/security/SecurityWorkspace.tsx	1970-01-01 00:00:00.000000000 +0000
++++ EtOps360_work/EtOps360_v02/src/web/src/features/security/SecurityWorkspace.tsx	2026-06-23 11:26:55.809427092 +0000
+@@ -0,0 +1,104 @@
++import { KeyRound, LockKeyhole, ShieldCheck, UsersRound } from 'lucide-react'
++import { SmartTable, type SmartTableColumn } from '../../components/SmartTable'
++import { StatusPill } from '../../components/StatusPill'
++import type { BranchAccess, ModuleProgress, RolePermission, SecurityModel, UserSession } from '../../types/etops'
++
++type SecurityWorkspaceProps = {
++  model: SecurityModel
++  session: UserSession
++}
++
++const roleColumns: SmartTableColumn<RolePermission>[] = [
++  { key: 'role', label: 'Rol', preferredWidth: 160, groupable: true },
++  { key: 'scope', label: 'Kapsam', preferredWidth: 150, groupable: true },
++  { key: 'description', label: 'Açıklama', preferredWidth: 340 },
++  {
++    key: 'permissions',
++    label: 'Yetkiler',
++    preferredWidth: 420,
++    render: (row) => row.permissions.join(', '),
++  },
++  {
++    key: 'dataScopes',
++    label: 'Veri sınırı',
++    preferredWidth: 230,
++    render: (row) => row.dataScopes.join(', '),
++  },
++]
++
++const branchColumns: SmartTableColumn<BranchAccess>[] = [
++  { key: 'branchName', label: 'Şube / nokta', preferredWidth: 170, groupable: true },
++  { key: 'region', label: 'Bölge', preferredWidth: 140, groupable: true },
++  { key: 'users', label: 'Kullanıcı grubu', preferredWidth: 230 },
++  { key: 'dataIsolation', label: 'Veri izolasyonu', preferredWidth: 260, groupable: true },
++  { key: 'approvalLimit', label: 'Onay kuralı', preferredWidth: 300 },
++  { key: 'modules', label: 'Modüller', preferredWidth: 340, render: (row) => row.modules.join(', ') },
++]
++
++const progressColumns: SmartTableColumn<ModuleProgress>[] = [
++  { key: 'module', label: 'Modül', preferredWidth: 240, groupable: true },
++  { key: 'status', label: 'Durum', preferredWidth: 130, groupable: true },
++  { key: 'done', label: 'Tamam %', preferredWidth: 100 },
++  { key: 'remaining', label: 'Kalan iş', preferredWidth: 320 },
++  { key: 'nextCodeArea', label: 'Sonraki kod alanı', preferredWidth: 240, groupable: true },
++]
++
++export function SecurityWorkspace({ model, session }: SecurityWorkspaceProps) {
++  const allowedBranches = session.allowedBranchIds.join(', ')
++  const permissionCount = session.permissions?.length ?? 0
++
++  return (
++    <section className="security-workspace">
++      <div className="sprint-banner sprint-banner--security">
++        <div>
++          <p className="eyebrow">Sprint 02 aktif</p>
++          <h2>Kullanıcı, şube, yetki, veri izolasyonu ve audit omurgası</h2>
++          <span>
++            Aktif oturum: {session.userName} · {session.role} · {permissionCount} yetki · {allowedBranches}
++          </span>
++        </div>
++        <ShieldCheck size={34} />
++      </div>
++
++      <div className="security-summary-grid">
++        <article className="security-summary-card">
++          <UsersRound size={20} />
++          <span>Rol matrisi</span>
++          <strong>{model.roles.length} rol</strong>
++          <small>RBAC + şube veri kapsamı</small>
++        </article>
++        <article className="security-summary-card">
++          <LockKeyhole size={20} />
++          <span>Şube izolasyonu</span>
++          <strong>{model.branchScopes.length} kapsam</strong>
++          <small>Object-level authorization için hazır</small>
++        </article>
++        <article className="security-summary-card">
++          <KeyRound size={20} />
++          <span>Guard rail</span>
++          <strong>{model.guardRails.length} kural</strong>
++          <small>Logo, audit, PCI ve idempotency</small>
++        </article>
++      </div>
++
++      <div className="guardrail-panel">
++        <div className="panel-heading">
++          <div>
++            <p className="eyebrow">Zorunlu güvenlik ve entegrasyon kuralları</p>
++            <h2>Üretim öncesi kırmızı çizgiler</h2>
++          </div>
++          <StatusPill value="Zorunlu" tone="danger" />
++        </div>
++        <div className="guardrail-list">
++          {model.guardRails.map((rule) => (
++            <span key={rule}>{rule}</span>
++          ))}
++        </div>
++      </div>
++
++      <SmartTable title="Rol ve yetki matrisi" rows={model.roles} columns={roleColumns} groupBy="scope" dense />
++      <SmartTable title="Şube, bölge ve veri kapsamı" rows={model.branchScopes} columns={branchColumns} groupBy="region" dense />
++      <SmartTable title="Modül tamamlanma ve sonraki kod alanları" rows={model.moduleProgress} columns={progressColumns} groupBy="status" dense />
++    </section>
++  )
++}
+diff -ruN --exclude node_modules --exclude dist --exclude bin --exclude obj EtOps360_sprint01_orig/EtOps360_v02/src/web/src/index.css EtOps360_work/EtOps360_v02/src/web/src/index.css
+--- EtOps360_sprint01_orig/EtOps360_v02/src/web/src/index.css	2026-06-23 10:50:42.000000000 +0000
++++ EtOps360_work/EtOps360_v02/src/web/src/index.css	2026-06-23 11:28:11.779312529 +0000
+@@ -1192,3 +1192,131 @@
+     flex-direction: column;
+   }
+ }
++
++/* Sprint 02 additions */
++.sprint-banner {
++  display: flex;
++  grid-column: 1 / -1;
++  align-items: center;
++  justify-content: space-between;
++  gap: 18px;
++  padding: 20px 22px;
++  border: 1px solid #d6e5dc;
++  border-radius: 18px;
++  background:
++    linear-gradient(135deg, rgba(255,255,255,.96), rgba(232,242,236,.92)),
++    radial-gradient(circle at 20% 20%, rgba(84, 123, 104, .16), transparent 36%);
++  box-shadow: 0 16px 40px rgba(70, 88, 78, .10);
++}
++
++.sprint-banner h2 {
++  margin: 3px 0 6px;
++  font-size: clamp(1.35rem, 2vw, 2.2rem);
++}
++
++.sprint-banner span {
++  color: #64746c;
++}
++
++.sprint-banner > strong {
++  display: grid;
++  place-items: center;
++  width: 68px;
++  height: 68px;
++  border-radius: 20px;
++  color: #ffffff;
++  font-size: 1.75rem;
++  background: linear-gradient(135deg, #456d5b, #6e91aa);
++  box-shadow: 0 14px 32px rgba(69, 109, 91, .24);
++}
++
++.sprint-banner--security {
++  margin-bottom: 16px;
++}
++
++.security-workspace {
++  display: grid;
++  gap: 18px;
++}
++
++.security-summary-grid {
++  display: grid;
++  grid-template-columns: repeat(3, minmax(0, 1fr));
++  gap: 14px;
++}
++
++.security-summary-card {
++  display: grid;
++  gap: 7px;
++  padding: 18px;
++  border: 1px solid #dfe9e3;
++  border-radius: 16px;
++  background: #ffffff;
++  box-shadow: 0 12px 32px rgba(70, 88, 78, .08);
++}
++
++.security-summary-card svg {
++  color: #547b68;
++}
++
++.security-summary-card span,
++.security-summary-card small {
++  color: #68776f;
++}
++
++.security-summary-card strong {
++  font-size: 1.6rem;
++}
++
++.guardrail-panel {
++  padding: 18px;
++  border: 1px solid #dfe9e3;
++  border-radius: 16px;
++  background: #ffffff;
++  box-shadow: 0 12px 32px rgba(70, 88, 78, .08);
++}
++
++.guardrail-list {
++  display: grid;
++  gap: 10px;
++  margin-top: 12px;
++}
++
++.guardrail-list span {
++  padding: 11px 12px;
++  border-radius: 12px;
++  color: #33443b;
++  background: #f5f8f6;
++}
++
++.detail-field textarea {
++  min-height: 82px;
++  resize: vertical;
++  border: 1px solid #d8e2db;
++  border-radius: 10px;
++  padding: 10px 12px;
++  color: #1c2521;
++  background: #ffffff;
++}
++
++.detail-field--wide {
++  grid-column: 1 / -1;
++}
++
++.document-row small {
++  display: block;
++  color: #7a8b82;
++  font-size: .76rem;
++  margin-top: 3px;
++}
++
++@media (max-width: 980px) {
++  .security-summary-grid {
++    grid-template-columns: 1fr;
++  }
++
++  .sprint-banner {
++    align-items: flex-start;
++    flex-direction: column;
++  }
++}
+diff -ruN --exclude node_modules --exclude dist --exclude bin --exclude obj EtOps360_sprint01_orig/EtOps360_v02/src/web/src/lib/api.ts EtOps360_work/EtOps360_v02/src/web/src/lib/api.ts
+--- EtOps360_sprint01_orig/EtOps360_v02/src/web/src/lib/api.ts	2026-06-23 10:47:58.000000000 +0000
++++ EtOps360_work/EtOps360_v02/src/web/src/lib/api.ts	2026-06-23 11:26:18.768477011 +0000
+@@ -17,6 +17,7 @@
+   ReconciliationRow,
+   ReportDefinition,
+   ReportResult,
++  SecurityModel,
+   TraceabilityResponse,
+   WorkQueueItem,
+ } from '../types/etops'
+@@ -80,4 +81,5 @@
+   reportResult: (reportId: string, filters: Partial<EtOpsFilters>) =>
+     fetchJson<ReportResult>(`/reports/${reportId}/result${query(filters)}`),
+   integrationQueue: () => fetchJson<IntegrationQueueItem[]>('/integration-queue'),
++  securityModel: () => fetchJson<SecurityModel>('/security-model'),
+ }
+diff -ruN --exclude node_modules --exclude dist --exclude bin --exclude obj EtOps360_sprint01_orig/EtOps360_v02/src/web/src/types/etops.ts EtOps360_work/EtOps360_v02/src/web/src/types/etops.ts
+--- EtOps360_sprint01_orig/EtOps360_v02/src/web/src/types/etops.ts	2026-06-23 10:47:46.000000000 +0000
++++ EtOps360_work/EtOps360_v02/src/web/src/types/etops.ts	2026-06-23 11:26:18.767487133 +0000
+@@ -56,6 +56,7 @@
+   units: SelectOption[]
+   processTypes: SelectOption[]
+   partners: SelectOption[]
++  productMasters: SelectOption[]
+   operationColumns: SmartColumn[]
+ }
+ 
+@@ -288,6 +289,39 @@
+   errorMessage: string
+ }
+ 
++export type RolePermission = {
++  role: string
++  scope: string
++  description: string
++  permissions: string[]
++  dataScopes: string[]
++}
++
++export type BranchAccess = {
++  branchId: string
++  branchName: string
++  region: string
++  users: string
++  dataIsolation: string
++  approvalLimit: string
++  modules: string[]
++}
++
++export type ModuleProgress = {
++  module: string
++  status: string
++  done: number
++  remaining: string
++  nextCodeArea: string
++}
++
++export type SecurityModel = {
++  roles: RolePermission[]
++  branchScopes: BranchAccess[]
++  moduleProgress: ModuleProgress[]
++  guardRails: string[]
++}
++
+ export type EtOpsFilters = {
+   branchId: string
+   protein: string
+@@ -308,3 +342,4 @@
+   | 'catalogs'
+   | 'reports'
+   | 'integrations'
++  | 'security'
